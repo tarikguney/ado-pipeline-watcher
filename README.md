@@ -4,35 +4,14 @@ A Chrome/Edge extension that watches Azure DevOps pipeline runs and pops a deskt
 
 ## Install
 
-> **Why not a one-click install?** Chrome and Edge both removed double-click `.crx` installs from outside the official stores for security. Until this extension is published to the Edge Add-ons / Chrome Web Store, the install is a few extra clicks — but it only takes a minute and you only do it once. Updates are a one-click "reload" against the same folder.
+1. Download the latest `ado-pipeline-watcher-vX.Y.Z.zip` from the [Releases page](https://github.com/tarikguney/ado-pipeline-watcher/releases) and unzip it somewhere permanent (the browser loads the extension from this folder — don't delete it).
+2. Open `edge://extensions` or `chrome://extensions` and turn on **Developer mode** (top-right).
+3. Click **Load unpacked** and select the unzipped folder.
+4. Pin the extension to the toolbar and sign in to `https://dev.azure.com/<your-org>` in the same browser profile.
 
-### Option A — From a GitHub release (recommended for end users)
+To update, drop the new release into the same folder and click the ↻ reload icon on the extension card.
 
-1. Go to the [Releases page](https://github.com/tarikguney/ado-pipeline-watcher/releases) and download the latest `ado-pipeline-watcher-vX.Y.Z.zip`.
-2. Unzip it somewhere permanent (e.g. `C:\Tools\ado-pipeline-watcher` on Windows or `~/tools/ado-pipeline-watcher` on macOS/Linux). **Do not delete this folder** — the browser loads the extension from it.
-3. Open `edge://extensions` (Edge) or `chrome://extensions` (Chrome).
-4. Toggle **Developer mode** on (top-right corner).
-5. Click **Load unpacked** and select the unzipped folder.
-6. Pin the extension to the toolbar (puzzle-piece icon → pin).
-7. Sign in to `https://dev.azure.com/<your-org>` in the same browser profile.
-
-**To update:** download the newer release ZIP, replace the contents of the same folder, then click the ↻ reload icon on the extension card.
-
-### Option B — From a git clone (for development)
-
-```bash
-git clone https://github.com/tarikguney/ado-pipeline-watcher.git
-```
-
-Then follow steps 3–7 above, pointing **Load unpacked** at the cloned repo.
-
-### Option C — `.crx` drag-drop (not recommended)
-
-A `.crx` may also be attached to releases. You can drag it onto `chrome://extensions` with developer mode on, but Chrome/Edge will often disable it on the next browser restart unless the extension ID is in an enterprise allow-list policy. Use **Option A** instead.
-
-### Future: Edge Add-ons / Chrome Web Store
-
-Once published, install will be a single click from the store. That's the only way to get true "double-click" install on modern Chrome/Edge.
+> Chrome and Edge no longer allow one-click `.crx` installs from outside the official stores. A store listing is planned.
 
 ## Usage
 
