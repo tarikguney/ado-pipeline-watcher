@@ -7,6 +7,15 @@ function fmtAge(ts) {
   return `${h}h ${m % 60}m ago`;
 }
 
+function formatBranch(ref) {
+  if (!ref) return null;
+  if (ref.startsWith('refs/heads/')) return ref.slice('refs/heads/'.length);
+  if (ref.startsWith('refs/tags/')) return 'tag: ' + ref.slice('refs/tags/'.length);
+  const pr = ref.match(/^refs\/pull\/(\d+)\/(?:merge|head)$/);
+  if (pr) return `PR #${pr[1]}`;
+  return ref;
+}
+
 function resultIcon(result) {
   switch (result) {
     case 'succeeded': return '✅';
@@ -99,7 +108,8 @@ async function render() {
   document.getElementById('empty-recent').style.display = recent.length ? 'none' : '';
 
   for (const e of watchList) {
-    const subtitle = e.buildNumber || e.runName;
+    const subtitle = e.buildNumber || e.runName || null;
+    const branch = formatBranch(e.sourceBranch);
     const showProgress = e.lastStatus === 'inProgress' && e.progress && e.progress.total > 0;
     const pct = showProgress ? Math.round((e.progress.done / e.progress.total) * 100) : 0;
 
@@ -117,6 +127,7 @@ async function render() {
           el('a', { href: e.url, target: '_blank', text: e.definition || `Build ${e.buildId}` })
         ]),
         subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,
+        branch ? el('div', { class: 'branch', text: `⎇ ${branch}`, title: e.sourceBranch || branch }) : null,
         progressBar,
         el('div', { class: 'meta', text: `${e.org} / ${e.project} · ${fmtAge(e.addedAt)}` })
       ]),
@@ -133,7 +144,8 @@ async function render() {
   }
 
   for (const r of recent) {
-    const subtitle = r.buildNumber || r.runName;
+    const subtitle = r.buildNumber || r.runName || null;
+    const branch = formatBranch(r.sourceBranch);
     const li = el('li', {}, [
       el('div', { class: 'info' }, [
         el('div', { class: 'def' }, [
@@ -141,6 +153,7 @@ async function render() {
           el('a', { href: r.url, target: '_blank', text: r.definition || `Build ${r.buildId}` })
         ]),
         subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,
+        branch ? el('div', { class: 'branch', text: `⎇ ${branch}`, title: r.sourceBranch || branch }) : null,
         el('div', { class: 'meta', text: `${r.org} / ${r.project} · finished ${fmtAge(r.finishedAt)}` })
       ]),
       el('button', {

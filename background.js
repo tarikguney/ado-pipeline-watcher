@@ -185,6 +185,7 @@ async function pollOnce() {
       entry.lastStatus = build.status;
       entry.definition = build.definition?.name || entry.definition;
       entry.buildNumber = build.buildNumber || entry.buildNumber;
+      entry.sourceBranch = build.sourceBranch || entry.sourceBranch || null;
 
       if (build.status === 'completed') {
         entry.progress = null;
