@@ -89,12 +89,14 @@ async function render() {
   document.getElementById('empty-recent').style.display = recent.length ? 'none' : '';
 
   for (const e of watchList) {
+    const subtitle = e.buildNumber || e.runName;
     const li = el('li', {}, [
       el('span', { class: `dot ${e.lastStatus || 'unknown'}` }),
       el('div', { class: 'info' }, [
         el('div', { class: 'def' }, [
           el('a', { href: e.url, target: '_blank', text: e.definition || `Build ${e.buildId}` })
         ]),
+        subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,
         el('div', { class: 'meta', text: `${e.org} / ${e.project} · ${fmtAge(e.addedAt)}` })
       ]),
       el('button', {
@@ -110,12 +112,14 @@ async function render() {
   }
 
   for (const r of recent) {
+    const subtitle = r.buildNumber || r.runName;
     const li = el('li', {}, [
       el('span', { text: resultIcon(r.result) }),
       el('div', { class: 'info' }, [
         el('div', { class: 'def' }, [
           el('a', { href: r.url, target: '_blank', text: r.definition || `Build ${r.buildId}` })
         ]),
+        subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,
         el('div', { class: 'meta', text: `${r.org} / ${r.project} · finished ${fmtAge(r.finishedAt)}` })
       ]),
       el('button', {
