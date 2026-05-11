@@ -4,28 +4,32 @@
   const BTN_ID = 'ado-watcher-watch-btn';
 
   function parseRun() {
-    // URL shape:
-    //   https://dev.azure.com/{org}/{project}/_build/results?buildId=12345&view=...
-    //   https://{instance}.visualstudio.com/{project}/_build/results?buildId=12345
+    // URL shapes:
+    //   https://dev.azure.com/{org}/{project}/_build/results?buildId=...
+    //   https://{org}.visualstudio.com/{project}/_build/results?buildId=...
+    //   https://{org}.visualstudio.com/{collection}/{project}/_build/results?buildId=...
     try {
       const u = new URL(location.href);
       const buildId = u.searchParams.get('buildId');
       if (!buildId) return null;
 
-      let org = null, project = null;
+      const parts = u.pathname.split('/').filter(Boolean);
+      const buildIdx = parts.indexOf('_build');
+      if (buildIdx < 1) return null;
+
+      let org = null, project = null, baseUrl = null;
       if (u.hostname === 'dev.azure.com') {
-        const parts = u.pathname.split('/').filter(Boolean);
-        // [org, project, '_build', 'results']
-        if (parts.length >= 2) {
-          org = parts[0];
-          project = parts[1];
-        }
+        if (buildIdx < 2) return null;
+        org = parts[0];
+        project = parts[buildIdx - 1];
+        baseUrl = `${u.origin}/${encodeURIComponent(org)}`;
       } else if (u.hostname.endsWith('.visualstudio.com')) {
         org = u.hostname.split('.')[0];
-        const parts = u.pathname.split('/').filter(Boolean);
-        if (parts.length >= 1) project = parts[0];
+        project = parts[buildIdx - 1];
+        const prefix = parts.slice(0, buildIdx - 1).map(encodeURIComponent).join('/');
+        baseUrl = prefix ? `${u.origin}/${prefix}` : u.origin;
       }
-      if (!org || !project) return null;
+      if (!org || !project || !baseUrl) return null;
 
       // Best-effort definition/run name from page title or DOM.
       const title = document.title || '';
@@ -38,7 +42,7 @@
       }
 
       return {
-        org, project, buildId,
+        org, project, buildId, baseUrl,
         definition,
         runName,
         url: location.href

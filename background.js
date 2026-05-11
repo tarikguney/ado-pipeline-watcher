@@ -38,17 +38,21 @@ async function updateBadge() {
   await chrome.action.setBadgeBackgroundColor({ color: '#0078d4' });
 }
 
-function buildApiUrl(org, project, buildId) {
-  return `https://dev.azure.com/${encodeURIComponent(org)}/${encodeURIComponent(project)}/_apis/build/builds/${encodeURIComponent(buildId)}?api-version=7.1`;
+function entryBaseUrl(entry) {
+  // Backward-compat for v0.2.0 entries that pre-date the baseUrl field.
+  return entry.baseUrl || `https://dev.azure.com/${encodeURIComponent(entry.org)}`;
 }
 
-function timelineApiUrl(org, project, buildId) {
-  return `https://dev.azure.com/${encodeURIComponent(org)}/${encodeURIComponent(project)}/_apis/build/builds/${encodeURIComponent(buildId)}/timeline?api-version=7.1`;
+function buildApiUrl(entry) {
+  return `${entryBaseUrl(entry)}/${encodeURIComponent(entry.project)}/_apis/build/builds/${encodeURIComponent(entry.buildId)}?api-version=7.1`;
 }
 
-async function fetchBuild(org, project, buildId) {
-  const url = buildApiUrl(org, project, buildId);
-  const resp = await fetch(url, {
+function timelineApiUrl(entry) {
+  return `${entryBaseUrl(entry)}/${encodeURIComponent(entry.project)}/_apis/build/builds/${encodeURIComponent(entry.buildId)}/timeline?api-version=7.1`;
+}
+
+async function fetchBuild(entry) {
+  const resp = await fetch(buildApiUrl(entry), {
     method: 'GET',
     credentials: 'include',
     headers: { 'Accept': 'application/json' },
@@ -57,9 +61,9 @@ async function fetchBuild(org, project, buildId) {
   return resp;
 }
 
-async function fetchProgress(org, project, buildId) {
+async function fetchProgress(entry) {
   try {
-    const resp = await fetch(timelineApiUrl(org, project, buildId), {
+    const resp = await fetch(timelineApiUrl(entry), {
       method: 'GET',
       credentials: 'include',
       headers: { 'Accept': 'application/json' },
@@ -163,7 +167,7 @@ async function pollOnce() {
         remaining.push(entry);
         continue;
       }
-      const resp = await fetchBuild(entry.org, entry.project, entry.buildId);
+      const resp = await fetchBuild(entry);
       if (resp.status === 401 || resp.status === 403) {
         await pauseAuthForOrg(entry.org);
         remaining.push(entry);
@@ -188,7 +192,7 @@ async function pollOnce() {
         finishedNow.push({ ...entry, finishedAt: Date.now(), result: build.result });
       } else {
         if (build.status === 'inProgress') {
-          entry.progress = await fetchProgress(entry.org, entry.project, entry.buildId);
+          entry.progress = await fetchProgress(entry);
         } else {
           entry.progress = null;
         }
@@ -219,12 +223,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   (async () => {
     try {
       if (msg.type === 'ADD_WATCH') {
-        const { org, project, buildId, definition, runName, url } = msg.payload;
+        const { org, project, buildId, baseUrl, definition, runName, url } = msg.payload;
         const list = await getList(STATE.watchList);
         const id = runKey(org, project, buildId);
         if (!list.find(e => e.id === id)) {
           list.push({
             id, org, project, buildId,
+            baseUrl: baseUrl || null,
             definition: definition || null,
             runName: runName || null,
             url,
@@ -262,6 +267,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
               org: item.org,
               project: item.project,
               buildId: item.buildId,
+              baseUrl: item.baseUrl || null,
               definition: item.definition,
               runName: item.runName,
               url: item.url,
