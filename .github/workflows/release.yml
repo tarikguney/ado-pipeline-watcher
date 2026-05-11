@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve versions
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          TAG_VER="${TAG#v}"
+          MANIFEST_VER=$(node -p "require('./manifest.json').version")
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "tag_ver=$TAG_VER" >> "$GITHUB_OUTPUT"
+          echo "manifest_ver=$MANIFEST_VER" >> "$GITHUB_OUTPUT"
+          if [ "$TAG_VER" != "$MANIFEST_VER" ]; then
+            echo "::error::Tag version ($TAG_VER) does not match manifest.json version ($MANIFEST_VER)."
+            exit 1
+          fi
+
+      - name: Build zip
+        id: zip
+        run: |
+          NAME="ado-pipeline-watcher-${{ steps.ver.outputs.tag }}"
+          mkdir -p dist staging
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitignore' \
+            --exclude='dist' \
+            --exclude='staging' \
+            ./ staging/
+          (cd staging && zip -r "../dist/${NAME}.zip" .)
+          echo "zip=dist/${NAME}.zip" >> "$GITHUB_OUTPUT"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          ls -la dist
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" \
+            "${{ steps.zip.outputs.zip }}" \
+            --title "${{ steps.ver.outputs.tag }}" \
+            --generate-notes
