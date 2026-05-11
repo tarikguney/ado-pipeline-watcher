@@ -142,6 +142,33 @@ async function pauseAuthForOrg(org) {
   });
 }
 
+async function openOrFocusTab(url) {
+  try {
+    const target = new URL(url);
+    const buildId = target.searchParams.get('buildId');
+    const candidates = await chrome.tabs.query({
+      url: ['*://dev.azure.com/*', '*://*.visualstudio.com/*']
+    });
+    let match = null;
+    if (buildId) {
+      const re = new RegExp(`buildId=${buildId}(?!\\d)`);
+      match = candidates.find(t => t.url && re.test(t.url));
+    } else {
+      match = candidates.find(t => t.url === url);
+    }
+    if (match) {
+      await chrome.tabs.update(match.id, { active: true });
+      if (typeof match.windowId === 'number') {
+        await chrome.windows.update(match.windowId, { focused: true });
+      }
+      return;
+    }
+  } catch {
+    // fall through to create
+  }
+  await chrome.tabs.create({ url });
+}
+
 async function isOrgPaused(org) {
   const paused = await getList(STATE.authPaused);
   const until = paused[org];
@@ -303,6 +330,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           lastPolledAt: lastPolledAt || 0,
           pollPeriodMs: POLL_PERIOD_MIN * 60 * 1000
         });
+      } else if (msg.type === 'OPEN_URL') {
+        await openOrFocusTab(msg.payload.url);
+        sendResponse({ ok: true });
       } else if (msg.type === 'POLL_NOW') {
         await pollOnce();
         sendResponse({ ok: true });
@@ -322,7 +352,7 @@ chrome.notifications.onClicked.addListener(async (notifId) => {
   const map = (await chrome.storage.local.get('notifUrls')).notifUrls || {};
   const url = map[notifId];
   if (url) {
-    chrome.tabs.create({ url });
+    await openOrFocusTab(url);
     delete map[notifId];
     await chrome.storage.local.set({ notifUrls: map });
   }

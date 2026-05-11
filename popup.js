@@ -200,7 +200,8 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('a[target="_blank"]');
   if (a) {
     e.preventDefault();
-    chrome.tabs.create({ url: a.href });
+    chrome.runtime.sendMessage({ type: 'OPEN_URL', payload: { url: a.href } });
+    window.close();
   }
 });
 
