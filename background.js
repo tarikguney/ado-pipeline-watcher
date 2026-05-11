@@ -236,6 +236,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           }
           await setList(STATE.recent, recent.filter(r => r.id !== id));
           await updateBadge();
+          pollOnce();
         }
         sendResponse({ ok: true });
       } else if (msg.type === 'DISMISS_RECENT') {
