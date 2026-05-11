@@ -97,6 +97,15 @@ function resultIcon(result) {
   }
 }
 
+function formatBranch(ref) {
+  if (!ref) return null;
+  if (ref.startsWith('refs/heads/')) return ref.slice('refs/heads/'.length);
+  if (ref.startsWith('refs/tags/')) return 'tag: ' + ref.slice('refs/tags/'.length);
+  const pr = ref.match(/^refs\/pull\/(\d+)\/(?:merge|head)$/);
+  if (pr) return `PR #${pr[1]}`;
+  return ref;
+}
+
 function resultLabel(result) {
   switch (result) {
     case 'succeeded': return 'Succeeded';
@@ -112,7 +121,8 @@ async function notifyFinished(entry, build) {
   const title = `${resultIcon(result)} ${resultLabel(result)}`;
   const defName = build.definition?.name || entry.definition || 'Pipeline';
   const num = build.buildNumber ? ` #${build.buildNumber}` : '';
-  const message = `${defName}${num}`;
+  const branch = formatBranch(build.sourceBranch || entry.sourceBranch);
+  const message = branch ? `${defName}${num}\n⎇ ${branch}` : `${defName}${num}`;
   const notifId = `ado-${entry.id}-${Date.now()}`;
   await chrome.notifications.create(notifId, {
     type: 'basic',
