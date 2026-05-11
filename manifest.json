@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "ADO Pipeline Watcher",
+  "version": "0.1.0",
+  "description": "Watch Azure DevOps pipeline runs and get a desktop notification when they finish. No PAT required - uses your existing browser session.",
+  "permissions": ["storage", "alarms", "notifications", "tabs"],
+  "host_permissions": [
+    "https://dev.azure.com/*",
+    "https://*.visualstudio.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ADO Pipeline Watcher",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dev.azure.com/*/_build/results*",
+        "https://*.visualstudio.com/*/_build/results*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

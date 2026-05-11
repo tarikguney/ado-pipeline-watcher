@@ -1,0 +1,31 @@
+.ado-watcher-btn {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483647;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #0078d4;
+  color: #fff;
+  font: 600 13px/1.2 "Segoe UI", system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+
+.ado-watcher-btn:hover {
+  background: #106ebe;
+}
+
+.ado-watcher-btn:active {
+  transform: translateY(1px);
+}
+
+.ado-watcher-btn[data-watching="1"] {
+  background: #107c10;
+}
+
+.ado-watcher-btn[data-watching="1"]:hover {
+  background: #0e6b0e;
+}

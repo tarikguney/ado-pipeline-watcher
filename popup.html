@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="title">
+      <img src="icons/icon32.png" alt="" class="header-icon" />
+      <span>ADO Pipeline Watcher</span>
+    </div>
+    <button id="refresh" title="Check now">↻</button>
+  </header>
+
+  <section>
+    <h2>Watching</h2>
+    <ul id="watch-list" class="list"></ul>
+    <p id="empty-watching" class="empty">Open a pipeline run page and click the "Watch this pipeline" button.</p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Recently finished</h2>
+      <button id="clear-recent" class="link-btn" title="Clear all">Clear all</button>
+    </div>
+    <ul id="recent-list" class="list"></ul>
+    <p id="empty-recent" class="empty">Nothing finished recently.</p>
+  </section>
+
+  <footer>
+    <div id="footer-status" class="foot-line foot-status">&nbsp;</div>
+    <div class="foot-line foot-meta">
+      <span id="footer-version">v0.0.0</span>
+      <span class="sep">·</span>
+      <a href="https://github.com/tarikguney/ado-pipeline-watcher" target="_blank">repo</a>
+      <span class="sep">·</span>
+      <a href="https://github.com/tarikguney/ado-pipeline-watcher/issues" target="_blank">report issue</a>
+    </div>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

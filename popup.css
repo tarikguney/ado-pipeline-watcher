@@ -1,0 +1,197 @@
+body {
+  margin: 0;
+  width: 360px;
+  font: 13px/1.4 "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #1f1f1f;
+  background: #fafafa;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #0078d4;
+  color: #fff;
+}
+
+header .title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.header-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+header button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.5);
+  color: #fff;
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+section {
+  padding: 10px 12px;
+  border-bottom: 1px solid #ececec;
+}
+
+section:last-of-type { border-bottom: 0; }
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.section-head h2 { margin: 0; }
+
+.link-btn {
+  background: transparent;
+  border: 0;
+  color: #0078d4;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.link-btn:hover { text-decoration: underline; }
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b6b6b;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.list li:first-child { border-top: 0; }
+
+.list .info { flex: 1; min-width: 0; }
+
+.list .def {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list .meta {
+  font-size: 11px;
+  color: #6b6b6b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list a {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.list a:hover { text-decoration: underline; }
+
+.list button {
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.list button:hover { background: #f0f0f0; }
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot.inProgress {
+  background: #f2c811;
+  animation: ado-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ado-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(242, 200, 17, 0.55);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(242, 200, 17, 0);
+    transform: scale(1.15);
+  }
+}
+.dot.notStarted { background: #888; }
+.dot.unknown { background: #888; }
+.dot.succeeded { background: #107c10; }
+.dot.failed { background: #d13438; }
+.dot.partiallySucceeded { background: #f7630c; }
+.dot.canceled { background: #888; }
+
+.empty {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+footer {
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #6b6b6b;
+  background: #f1f1f1;
+  border-top: 1px solid #ececec;
+}
+
+footer a {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+footer a:hover { text-decoration: underline; }
+
+.foot-line {
+  line-height: 1.5;
+}
+
+.foot-status {
+  color: #555;
+}
+
+.foot-status.warn {
+  color: #b35900;
+  font-weight: 600;
+}
+
+.foot-meta .sep {
+  margin: 0 4px;
+  color: #bbb;
+}
