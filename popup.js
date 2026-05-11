@@ -40,12 +40,22 @@ function fmtSec(s) {
   return `${m}m${s % 60 ? ' ' + (s % 60) + 's' : ''}`;
 }
 
+let lastSeenPollTs = null;
+
 function renderFooter(state) {
   const versionEl = document.getElementById('footer-version');
   versionEl.textContent = 'v' + (chrome.runtime.getManifest().version || '0');
 
   const statusEl = document.getElementById('footer-status');
   statusEl.classList.remove('warn');
+
+  const polledAt = state?.lastPolledAt || 0;
+  if (lastSeenPollTs !== null && polledAt > lastSeenPollTs) {
+    statusEl.classList.remove('flash');
+    void statusEl.offsetWidth; // restart animation
+    statusEl.classList.add('flash');
+  }
+  lastSeenPollTs = polledAt;
 
   const pausedOrgs = Object.entries(state?.authPaused || {})
     .filter(([_, until]) => until > Date.now())
@@ -159,9 +169,18 @@ document.getElementById('clear-recent').addEventListener('click', async () => {
   render();
 });
 
-document.getElementById('refresh').addEventListener('click', async () => {
-  await send('POLL_NOW');
-  render();
+document.getElementById('refresh').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.classList.add('spinning');
+  try {
+    await send('POLL_NOW');
+    await render();
+  } finally {
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+  }
 });
 
 document.addEventListener('click', (e) => {
