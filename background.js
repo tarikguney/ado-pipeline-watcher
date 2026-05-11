@@ -42,6 +42,10 @@ function buildApiUrl(org, project, buildId) {
   return `https://dev.azure.com/${encodeURIComponent(org)}/${encodeURIComponent(project)}/_apis/build/builds/${encodeURIComponent(buildId)}?api-version=7.1`;
 }
 
+function timelineApiUrl(org, project, buildId) {
+  return `https://dev.azure.com/${encodeURIComponent(org)}/${encodeURIComponent(project)}/_apis/build/builds/${encodeURIComponent(buildId)}/timeline?api-version=7.1`;
+}
+
 async function fetchBuild(org, project, buildId) {
   const url = buildApiUrl(org, project, buildId);
   const resp = await fetch(url, {
@@ -51,6 +55,32 @@ async function fetchBuild(org, project, buildId) {
     cache: 'no-store'
   });
   return resp;
+}
+
+async function fetchProgress(org, project, buildId) {
+  try {
+    const resp = await fetch(timelineApiUrl(org, project, buildId), {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const records = data?.records || [];
+    if (!records.length) return null;
+    // Prefer Stage granularity; fall back to Job; fall back to Task.
+    for (const type of ['Stage', 'Job', 'Task']) {
+      const subset = records.filter(r => r.type === type);
+      if (subset.length) {
+        const done = subset.filter(r => r.state === 'completed').length;
+        return { done, total: subset.length, granularity: type };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function resultIcon(result) {
@@ -153,9 +183,15 @@ async function pollOnce() {
       entry.buildNumber = build.buildNumber || entry.buildNumber;
 
       if (build.status === 'completed') {
+        entry.progress = null;
         await notifyFinished(entry, build);
         finishedNow.push({ ...entry, finishedAt: Date.now(), result: build.result });
       } else {
+        if (build.status === 'inProgress') {
+          entry.progress = await fetchProgress(entry.org, entry.project, entry.buildId);
+        } else {
+          entry.progress = null;
+        }
         remaining.push(entry);
       }
     } catch (e) {

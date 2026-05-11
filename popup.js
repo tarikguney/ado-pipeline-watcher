@@ -90,6 +90,16 @@ async function render() {
 
   for (const e of watchList) {
     const subtitle = e.buildNumber || e.runName;
+    const showProgress = e.lastStatus === 'inProgress' && e.progress && e.progress.total > 0;
+    const pct = showProgress ? Math.round((e.progress.done / e.progress.total) * 100) : 0;
+
+    const progressBar = showProgress
+      ? el('div', { class: 'progress', title: `${e.progress.done}/${e.progress.total} ${e.progress.granularity.toLowerCase()}s completed` }, [
+          el('div', { class: 'progress-fill', style: `width: ${pct}%` }),
+          el('div', { class: 'progress-label', text: `${pct}%` })
+        ])
+      : null;
+
     const li = el('li', {}, [
       el('span', { class: `dot ${e.lastStatus || 'unknown'}` }),
       el('div', { class: 'info' }, [
@@ -97,6 +107,7 @@ async function render() {
           el('a', { href: e.url, target: '_blank', text: e.definition || `Build ${e.buildId}` })
         ]),
         subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,
+        progressBar,
         el('div', { class: 'meta', text: `${e.org} / ${e.project} · ${fmtAge(e.addedAt)}` })
       ]),
       el('button', {
