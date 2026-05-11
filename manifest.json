@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ADO Pipeline Watcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Watch Azure DevOps pipeline runs and get a desktop notification when they finish. No PAT required - uses your existing browser session.",
   "permissions": ["storage", "alarms", "notifications", "tabs"],
   "host_permissions": [

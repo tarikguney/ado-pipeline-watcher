@@ -101,9 +101,9 @@ async function render() {
       : null;
 
     const li = el('li', {}, [
-      el('span', { class: `dot ${e.lastStatus || 'unknown'}` }),
       el('div', { class: 'info' }, [
         el('div', { class: 'def' }, [
+          el('span', { class: `dot ${e.lastStatus || 'unknown'}` }),
           el('a', { href: e.url, target: '_blank', text: e.definition || `Build ${e.buildId}` })
         ]),
         subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,
@@ -125,9 +125,9 @@ async function render() {
   for (const r of recent) {
     const subtitle = r.buildNumber || r.runName;
     const li = el('li', {}, [
-      el('span', { text: resultIcon(r.result) }),
       el('div', { class: 'info' }, [
         el('div', { class: 'def' }, [
+          el('span', { class: 'result-icon', text: resultIcon(r.result) }),
           el('a', { href: r.url, target: '_blank', text: r.definition || `Build ${r.buildId}` })
         ]),
         subtitle ? el('div', { class: 'subtitle', text: subtitle }) : null,

@@ -94,10 +94,24 @@ h2 {
 .list .info { flex: 1; min-width: 0; }
 
 .list .def {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
+  min-width: 0;
+}
+
+.list .def a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.list .result-icon {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .list .subtitle {
