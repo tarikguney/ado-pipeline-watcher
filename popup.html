@@ -10,8 +10,12 @@
       <img src="icons/icon32.png" alt="" class="header-icon" />
       <span>ADO Pipeline Watcher</span>
     </div>
-    <button id="refresh" title="Check now"><span class="refresh-icon">↻</span></button>
+    <div class="header-actions">
+      <button id="copy-all" title="Generate an AI prompt that monitors every watched run"><span class="btn-icon">✨</span> Generate AI Prompt</button>
+      <button id="refresh" title="Check now"><span class="refresh-icon">↻</span></button>
+    </div>
   </header>
+  <div id="toast" class="toast" aria-live="polite"></div>
 
   <section>
     <h2>Watching</h2>

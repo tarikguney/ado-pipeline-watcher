@@ -16,6 +16,57 @@ function formatBranch(ref) {
   return ref;
 }
 
+function promptForEntry(e) {
+  const lines = [
+    `Watch this ADO pipeline run and notify me when it completes (succeeded / failed / partially / canceled).`,
+    `- Definition: ${e.definition || '(unknown)'}`
+  ];
+  const num = e.buildNumber || e.runName;
+  if (num) lines.push(`- Run: ${num}`);
+  const branch = formatBranch(e.sourceBranch);
+  if (branch) lines.push(`- Branch: ${branch}`);
+  lines.push(`- URL: ${e.url}`);
+  lines.push(``);
+  lines.push(`If it fails or is partial, fetch the failing job's log tail and summarize the error.`);
+  return lines.join('\n');
+}
+
+function promptForList(entries) {
+  if (entries.length === 1) return promptForEntry(entries[0]);
+  const header = `Watch these ${entries.length} ADO pipeline runs and notify me as each one completes (succeeded / failed / partially / canceled). One ping per run is fine.`;
+  const blocks = entries.map((e, i) => {
+    const lines = [`${i + 1}. Definition: ${e.definition || '(unknown)'}`];
+    const num = e.buildNumber || e.runName;
+    if (num) lines.push(`   Run: ${num}`);
+    const branch = formatBranch(e.sourceBranch);
+    if (branch) lines.push(`   Branch: ${branch}`);
+    lines.push(`   URL: ${e.url}`);
+    return lines.join('\n');
+  });
+  const footer = `If any fail or are partial, fetch the failing job's log tail and summarize the error.`;
+  return [header, '', ...blocks, '', footer].join('\n');
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+let toastTimer = null;
+function showToast(message, opts = {}) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.toggle('error', !!opts.error);
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), opts.duration || 1800);
+}
+
 function resultIcon(result) {
   switch (result) {
     case 'succeeded': return '✅';
@@ -132,6 +183,18 @@ async function render() {
         el('div', { class: 'meta', text: `${e.org} / ${e.project} · ${fmtAge(e.addedAt)}` })
       ]),
       el('button', {
+        text: '✨',
+        title: 'Generate AI prompt for this run',
+        class: 'copy-btn',
+        onclick: async () => {
+          const ok = await copyText(promptForEntry(e));
+          showToast(
+            ok ? 'AI prompt for this run copied to clipboard' : 'Could not copy to clipboard',
+            { error: !ok }
+          );
+        }
+      }),
+      el('button', {
         text: '✕',
         title: 'Stop watching',
         onclick: async () => {
@@ -180,6 +243,22 @@ async function render() {
 document.getElementById('clear-recent').addEventListener('click', async () => {
   await send('CLEAR_RECENT');
   render();
+});
+
+document.getElementById('copy-all').addEventListener('click', async () => {
+  const state = await send('GET_STATE');
+  const list = state?.watchList || [];
+  if (!list.length) {
+    showToast('No watched runs to generate a prompt for', { error: true });
+    return;
+  }
+  const ok = await copyText(promptForList(list));
+  showToast(
+    ok
+      ? `AI prompt for ${list.length} run${list.length > 1 ? 's' : ''} copied to clipboard`
+      : 'Could not copy to clipboard',
+    { error: !ok }
+  );
 });
 
 document.getElementById('refresh').addEventListener('click', async (e) => {
