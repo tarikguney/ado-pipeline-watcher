@@ -64,7 +64,7 @@ function showToast(message, opts = {}) {
   toast.classList.toggle('error', !!opts.error);
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), opts.duration || 1800);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), opts.duration || 5000);
 }
 
 function resultIcon(result) {
@@ -183,13 +183,13 @@ async function render() {
         el('div', { class: 'meta', text: `${e.org} / ${e.project} · ${fmtAge(e.addedAt)}` })
       ]),
       el('button', {
-        text: '✨',
-        title: 'Generate AI prompt for this run',
+        text: '🤖',
+        title: 'Copy a prompt for this run to hand off to Claude/Copilot/etc.',
         class: 'copy-btn',
         onclick: async () => {
           const ok = await copyText(promptForEntry(e));
           showToast(
-            ok ? 'AI prompt for this run copied to clipboard' : 'Could not copy to clipboard',
+            ok ? 'Prompt copied — paste it into your favorite AI tool to monitor this run' : 'Could not copy to clipboard',
             { error: !ok }
           );
         }
@@ -255,7 +255,7 @@ document.getElementById('copy-all').addEventListener('click', async () => {
   const ok = await copyText(promptForList(list));
   showToast(
     ok
-      ? `AI prompt for ${list.length} run${list.length > 1 ? 's' : ''} copied to clipboard`
+      ? `Prompt for ${list.length} run${list.length > 1 ? 's' : ''} copied — paste it into your favorite AI tool to monitor`
       : 'Could not copy to clipboard',
     { error: !ok }
   );
